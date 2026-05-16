@@ -65,7 +65,9 @@ class SenderMemory:
         # slightly pulls ALL scores toward the neutral range.
         for s in list(self._scores):
             self._scores[s] = round(
-                min(3.0, max(1.0, self._scores[s] * self.DECAY + 2.0 * (1 - self.DECAY))),
+                min(
+                    3.0, max(1.0, self._scores[s] * self.DECAY + 2.0 * (1 - self.DECAY))
+                ),
                 4,
             )
 

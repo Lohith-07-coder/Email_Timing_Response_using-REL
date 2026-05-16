@@ -68,7 +68,9 @@ def get_trained_agent(mode: str = "dqn", force_retrain: bool = False):
                 agent._policy_net = agent._policy_net.to("cpu")
                 agent._target_net = agent._target_net.to("cpu")
                 # fix old buffer attribute name if needed
-                if hasattr(agent._buffer, "_buf") and not hasattr(agent._buffer, "_buffer"):
+                if hasattr(agent._buffer, "_buf") and not hasattr(
+                    agent._buffer, "_buffer"
+                ):
                     agent._buffer._buffer = agent._buffer._buf
             else:
                 agent = DQNAgent()

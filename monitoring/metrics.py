@@ -38,12 +38,16 @@ class MetricsTracker:
         self._confidence_sum: float = 0.0
         self._confidence_n: int = 0
         self._latencies: list = []
-        self._dump_path = dump_path or os.environ.get("METRICS_PATH", "logs/metrics.json")
+        self._dump_path = dump_path or os.environ.get(
+            "METRICS_PATH", "logs/metrics.json"
+        )
         self._start_ts = time.time()
 
     # ── public API ────────────────────────────────────────────────────────────
 
-    def record_prediction(self, action_id: int, confidence: float, latency_ms: float = 0.0):
+    def record_prediction(
+        self, action_id: int, confidence: float, latency_ms: float = 0.0
+    ):
         label = ACTION_LABELS.get(action_id, f"action_{action_id}")
         with self._lock:
             self._counts[label] += 1
@@ -56,7 +60,9 @@ class MetricsTracker:
         with self._lock:
             total = sum(self._counts.values())
             avg_conf = (
-                round(self._confidence_sum / self._confidence_n, 4) if self._confidence_n else 0.0
+                round(self._confidence_sum / self._confidence_n, 4)
+                if self._confidence_n
+                else 0.0
             )
             lat_sorted = sorted(self._latencies)
             return {

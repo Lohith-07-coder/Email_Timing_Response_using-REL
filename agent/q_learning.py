@@ -32,7 +32,12 @@ class QLearningAgent(BaseAgent):
         return int(np.argmax(self.q_table[self._key(state)]))
 
     def learn(
-        self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool
+        self,
+        state: np.ndarray,
+        action: int,
+        reward: float,
+        next_state: np.ndarray,
+        done: bool,
     ) -> None:
         s, s_ = self._key(state), self._key(next_state)
         future_value = 0.0 if done else np.max(self.q_table[s_])

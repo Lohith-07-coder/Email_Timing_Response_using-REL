@@ -49,14 +49,26 @@ class TestEmailDataclass:
 
     def test_edge_case_min_values(self):
         e = Email(
-            "a", "b", priority=1, sender_importance=1, waiting_time=0, workload=1, time_of_day=0
+            "a",
+            "b",
+            priority=1,
+            sender_importance=1,
+            waiting_time=0,
+            workload=1,
+            time_of_day=0,
         )
         vec = e.to_state_vector()
         assert np.all(vec == 0.0), "Min-value email should map to all zeros"
 
     def test_edge_case_max_values(self):
         e = Email(
-            "a", "b", priority=3, sender_importance=3, waiting_time=1440, workload=3, time_of_day=23
+            "a",
+            "b",
+            priority=3,
+            sender_importance=3,
+            waiting_time=1440,
+            workload=3,
+            time_of_day=23,
         )
         vec = e.to_state_vector()
         assert np.all(vec == 1.0), "Max-value email should map to all ones"
@@ -91,7 +103,9 @@ class TestRewardCalculator:
 
     def test_reply_now_high_priority_positive(self, calc, high_priority_email):
         r = calc.calculate(high_priority_email, action=0)  # reply_now
-        assert r > 0, "Replying immediately to high-priority email should yield positive reward"
+        assert (
+            r > 0
+        ), "Replying immediately to high-priority email should yield positive reward"
 
     def test_archive_low_priority_positive(self, calc, low_priority_email):
         r = calc.calculate(low_priority_email, action=3)  # archive
@@ -132,4 +146,9 @@ class TestEmailEnvironment:
 
     def test_action_labels(self, env):
         labels = env.action_labels
-        assert set(labels.values()) == {"reply_now", "delay_reply", "mark_important", "archive"}
+        assert set(labels.values()) == {
+            "reply_now",
+            "delay_reply",
+            "mark_important",
+            "archive",
+        }

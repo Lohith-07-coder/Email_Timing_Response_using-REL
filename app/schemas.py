@@ -7,8 +7,12 @@ class EmailRequest(BaseModel):
     subject: str = Field(..., example="Meeting Tomorrow")
     sender: str = Field(..., example="boss@company.com")
     priority: int = Field(..., ge=1, le=3, description="1=low, 2=medium, 3=high")
-    sender_importance: int = Field(..., ge=1, le=3, description="1=promo, 2=normal, 3=academic/gov")
-    waiting_time: int = Field(..., ge=0, description="Minutes the email has been waiting")
+    sender_importance: int = Field(
+        ..., ge=1, le=3, description="1=promo, 2=normal, 3=academic/gov"
+    )
+    waiting_time: int = Field(
+        ..., ge=0, description="Minutes the email has been waiting"
+    )
     workload: int = Field(..., ge=1, le=3, description="1=light, 2=moderate, 3=heavy")
     time_of_day: int = Field(..., ge=0, le=23, description="Hour of the day (0-23)")
 

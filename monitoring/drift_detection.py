@@ -55,7 +55,7 @@ class DriftDetector:
         self._n_bins = n_bins
         self._alerts: list = []
 
-    # ── public API ────────────────────────────────────────────────────────────
+    # public API
 
     def update(self, state_vector: np.ndarray):
         """Add a new observation to the rolling window."""
@@ -98,7 +98,10 @@ class DriftDetector:
                 "status": level,
             }
             if level != "ok":
-                msg = f"[{level.upper()}] Feature '{feat}' drift: PSI={psi:.3f}, z={z_score:.2f}"
+                msg = (
+                    f"[{level.upper()}] Feature '{feat}' drift: "
+                    f"PSI={psi:.3f}, z={z_score:.2f}"
+                )
                 drift_report["alerts"].append(msg)
                 logger.warning(msg)
 
@@ -116,7 +119,7 @@ class DriftDetector:
             json.dump(report, f, indent=2)
         return report
 
-    # ── helpers ───────────────────────────────────────────────────────────────
+    # helpers
 
     def _psi(self, ref_mean: float, ref_std: float, live_col: np.ndarray) -> float:
         """
@@ -133,7 +136,7 @@ class DriftDetector:
         psi = float(np.sum((live_pct - ref_pct) * np.log(live_pct / ref_pct)))
         return max(psi, 0.0)
 
-    # ── factory ───────────────────────────────────────────────────────────────
+    # factory
 
     @classmethod
     def from_reference_stats(cls, ref_means, ref_stds, **kwargs) -> "DriftDetector":

@@ -199,7 +199,11 @@ class NLPEmailExtractor:
                             (used by SenderMemory to inject adapted score).
         """
         priority = self._classify_priority(subject, sender)
-        si = sender_importance if sender_importance is not None else self._classify_sender(sender)
+        si = (
+            sender_importance
+            if sender_importance is not None
+            else self._classify_sender(sender)
+        )
         workload = self._workload()
         return Email(
             subject=subject,

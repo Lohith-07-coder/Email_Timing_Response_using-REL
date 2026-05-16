@@ -8,13 +8,29 @@ class TerminalEmailSource(EmailSource):
         print("\n── Manual Email Entry ──")
         subject = input("Subject                                   : ").strip()
         sender = input("Sender email                              : ").strip()
-        priority = self._prompt_int("Priority           (1=low 2=medium 3=high): ", 1, 3)
-        sender_importance = self._prompt_int("Sender importance  (1=low 2=medium 3=high): ", 1, 3)
-        waiting_time = self._prompt_int("Waiting time       (minutes, 0–60)        : ", 0, 60)
-        workload = self._prompt_int("Workload           (1=light 2=moderate 3=heavy): ", 1, 3)
-        time_of_day = self._prompt_int("Time of day        (0–23)                 : ", 0, 23)
+        priority = self._prompt_int(
+            "Priority           (1=low 2=medium 3=high): ", 1, 3
+        )
+        sender_importance = self._prompt_int(
+            "Sender importance  (1=low 2=medium 3=high): ", 1, 3
+        )
+        waiting_time = self._prompt_int(
+            "Waiting time       (minutes, 0–60)        : ", 0, 60
+        )
+        workload = self._prompt_int(
+            "Workload           (1=light 2=moderate 3=heavy): ", 1, 3
+        )
+        time_of_day = self._prompt_int(
+            "Time of day        (0–23)                 : ", 0, 23
+        )
         return Email(
-            subject, sender, priority, sender_importance, waiting_time, workload, time_of_day
+            subject,
+            sender,
+            priority,
+            sender_importance,
+            waiting_time,
+            workload,
+            time_of_day,
         )
 
     @staticmethod

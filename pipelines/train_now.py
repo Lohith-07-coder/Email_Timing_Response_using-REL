@@ -64,7 +64,9 @@ if not enron_has_files:
                     self._last = pct
 
     urllib.request.urlretrieve(
-        "https://www.cs.cmu.edu/~enron/enron_mail_20150507.tar.gz", TAR_PATH, ProgressBar()
+        "https://www.cs.cmu.edu/~enron/enron_mail_20150507.tar.gz",
+        TAR_PATH,
+        ProgressBar(),
     )
     print("\nExtracting, this may take a few minutes...")
     with tarfile.open(TAR_PATH, "r:gz") as tar:

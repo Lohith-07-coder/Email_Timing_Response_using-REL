@@ -114,7 +114,9 @@ class DQNAgent(BaseAgent):
             # Reduces Q-value overestimation vs vanilla DQN (max from same net).
             best_acts = self._policy_net(next_states).argmax(1)  # action selection
             max_next_q = (
-                self._target_net(next_states).gather(1, best_acts.unsqueeze(1)).squeeze(1)
+                self._target_net(next_states)
+                .gather(1, best_acts.unsqueeze(1))
+                .squeeze(1)
             )  # value evaluation
             target_q = rewards + self.gamma * max_next_q * (1 - dones)
         loss = nn.SmoothL1Loss()(current_q, target_q)

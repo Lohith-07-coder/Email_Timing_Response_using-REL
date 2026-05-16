@@ -52,7 +52,9 @@ class EnronLoader:
 
     def to_dataframe(self) -> pd.DataFrame:
         emails = self.load()
-        return pd.DataFrame([{"subject": e.subject, "sender": e.sender} for e in emails])
+        return pd.DataFrame(
+            [{"subject": e.subject, "sender": e.sender} for e in emails]
+        )
 
     def _parse(self, path: str) -> RawEmail | None:
         try:

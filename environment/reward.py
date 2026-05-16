@@ -3,7 +3,9 @@ from data.email_data import Email
 
 class RewardCalculator:
     """
-    Reward table for the Decision Agent. The agent was trained against these exact base values.
+    Reward table for the Decision Agent.
+
+    The agent was trained against these exact base values.
 
     Contextual waiting-time overrides dynamically scale rewards
     to add temporal awareness and break degenerate policies.
@@ -46,7 +48,7 @@ class RewardCalculator:
                 self.ARCHIVE: +6.0,
             }[action]
 
-        # ── Context-aware waiting-time override ───────────────────────────────
+        # Context-aware waiting-time override.
         # Breaks degenerate policies (e.g. "always delay medium").
         # Threshold scales with priority — high-urgency emails go stale faster.
         threshold = self.WAIT_THRESHOLDS.get(email.priority, 30)
@@ -67,7 +69,7 @@ class RewardCalculator:
                 elif action == self.ARCHIVE:
                     reward = +3.0  # still ok to archive, just slightly less so
 
-        # ── Contextual penalties ──────────────────────────────────────────────
+        # Contextual penalties.
         if action == self.REPLY_NOW and email.priority < 3 and email.workload == 3:
             reward -= 4.0
         is_offhours = email.time_of_day >= 19 or email.time_of_day <= 7

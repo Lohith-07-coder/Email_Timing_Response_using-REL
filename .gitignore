@@ -25,6 +25,8 @@ env/
 # models/*.pt
 # models/*.pkl
 # models/checkpoint_*.pkl
+*.pt
+mlruns/
 
 # Logs
 #logs/
@@ -58,16 +60,20 @@ mlartifacts/
 
 # Reward curve images (generated artefacts)
 # reward_curve*.png
+<<<<<<< HEAD
 credentials.json
 client_secret*.json
 token.pkl
 data/processed_emails.json
 data/recommendations.jsonl
 data/feedback_events.jsonl
+=======
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 # Logs
 logs/
 *.log
 
+<<<<<<< HEAD
 # Environment
 .env
 .env.*
@@ -84,3 +90,18 @@ token.json
 token.pkl
 credentials.json
 client_secret*.json
+=======
+# Model artifacts
+models/*.pkl
+models/*.pt
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# MLflow
+mlruns/
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64

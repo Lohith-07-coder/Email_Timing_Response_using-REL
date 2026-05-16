@@ -123,7 +123,17 @@ feedback_store = FeedbackStore()
 extractor = NLPEmailExtractor()
 sender_memory = SenderMemory()
 
+<<<<<<< HEAD
 # ── Learning validation: session reward tracking ──────────────────────────────
+=======
+# Arrival-time store.
+# Keyed by hash(subject|sender).
+# Set on /infer (first keystroke), popped on /decide_nlp (decision time).
+# Tracks real "time in inbox before action".
+_arrival_times: dict = {}
+
+# Learning validation: session reward tracking.
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 ROLLING_WINDOW = 50  # last N decisions for rolling average
 _session_stats = {
     "decisions": 0,
@@ -144,10 +154,14 @@ def get_agent():
         # Start epsilon at 0.3 so the online learning buffer gets diverse samples.
         # Decays every 10 decisions via decay_epsilon() called in _decide().
         _agent.epsilon = 0.3
-        print("[INIT] Online learning enabled. epsilon = 0.3 (will decay over interactions)")
+        print(
+            "[INIT] Online learning enabled. epsilon = 0.3 "
+            "(will decay over interactions)"
+        )
     return _agent
 
 
+<<<<<<< HEAD
 def get_gmail_service():
     global _gmail_service
     if _gmail_service is None:
@@ -261,6 +275,9 @@ def _serialize_workflow_record(email, thread, intelligence, recommendation, pred
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+=======
+# Routes.
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 
 
 @app.route("/agent_status")
@@ -276,7 +293,9 @@ def agent_status():
 
 @app.route("/debug")
 def debug():
-    """Full debug snapshot — epsilon, sender memory, device info, session stats."""
+    """
+    Full debug snapshot — epsilon, sender memory, device info, session stats.
+    """
     agent = get_agent()
     hist = _session_stats["history"]
     rolling_avg = (sum(hist) / len(hist)) if hist else 0.0
@@ -462,13 +481,15 @@ def _decide(email: Email):
     reward = RewardCalculator().calculate(email, action)
     label = ["reply_now", "delay_reply", "mark_important", "archive"][action]
 
-    # ── Structured debug log + Q-value explosion guard ────────────────────────
+    # Structured debug log + Q-value explosion guard.
     with torch.no_grad():
         t = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(agent._device)
         q_vals = [round(x, 3) for x in agent._policy_net(t)[0].tolist()]
 
     q_max = max(q_vals)
-    q_warn = "  *** Q-VALUE EXPLOSION — check training stability ***" if q_max > 500 else ""
+    q_warn = (
+        "  *** Q-VALUE EXPLOSION — check training stability ***" if q_max > 500 else ""
+    )
 
     print(
         f"\n[DECIDE] subject={email.subject!r:.45}  sender={email.sender!r:.30}\n"
@@ -478,12 +499,13 @@ def _decide(email: Email):
         f"epsilon = {round(saved_eps, 4)}   wait = {email.waiting_time}min"
     )
 
-    # ── Online learning: adapt to new reward signal without full retrain ───────
-    # next_state = state (same-state approximation — we don't have the next email yet).
+    # Online learning: adapt to new reward signal without full retrain.
+    # next_state = state (same-state approximation).
+    # We don't have the next email yet.
     # Once replay buffer hits batch_size (64), each call does a gradient step.
     agent.learn(state, action, reward, state, False)
 
-    # ── Session stats + epsilon decay ─────────────────────────────────────────
+    # Session stats + epsilon decay.
     _session_stats["decisions"] += 1
     _session_stats["total_reward"] += reward
     _session_stats["action_counts"][action] += 1
@@ -543,6 +565,7 @@ def decide_nlp():
         data = request.get_json()
         subject, sender = data["subject"].strip(), data["sender"].strip()
 
+<<<<<<< HEAD
         key = hash(f"{subject}|{sender}")
         arrival = _arrival_times.pop(key, None)
         waiting_mins = int((datetime.now() - arrival).total_seconds() / 60) if arrival else 0
@@ -559,6 +582,31 @@ def decide_nlp():
         action_int = ["reply_now", "delay_reply", "mark_important", "archive"].index(label)
 
         sender_memory.update(sender, action_int, reward)
+=======
+    # Compute real waiting time (arrival → now).
+    key = hash(f"{subject}|{sender}")
+    arrival = _arrival_times.pop(key, None)  # pop → clear for next submission
+    waiting_mins = (
+        int((datetime.now() - arrival).total_seconds() / 60) if arrival else 0
+    )
+
+    # Adapt sender importance via session memory.
+    rule_si = extractor._classify_sender(sender)
+    adapted_si = sender_memory.get_importance(sender, rule_si)
+
+    # Build email with corrected features.
+    email = extractor.extract(
+        subject, sender, waiting_time=waiting_mins, sender_importance=adapted_si
+    )
+    reasoning = extractor.explain(subject, sender)
+
+    # Agent decides.
+    label, reward, state = _decide(email)
+    action_int = ["reply_now", "delay_reply", "mark_important", "archive"].index(label)
+
+    # Update sender memory.
+    sender_memory.update(sender, action_int, reward)
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 
         return jsonify(
             {

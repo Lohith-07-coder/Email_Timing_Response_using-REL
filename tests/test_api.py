@@ -83,7 +83,12 @@ class TestPredictEndpoint:
         assert "action_id" in data
         assert "action_label" in data
         assert 0 <= data["action_id"] <= 3
-        assert data["action_label"] in ("reply_now", "delay_reply", "mark_important", "archive")
+        assert data["action_label"] in (
+            "reply_now",
+            "delay_reply",
+            "mark_important",
+            "archive",
+        )
 
     def test_predict_returns_state_vector(self, client_with_mock_agent, valid_payload):
         r = client_with_mock_agent.post("/predict", json=valid_payload)

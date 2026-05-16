@@ -41,7 +41,12 @@ def authenticate_gmail():
 def get_unread_emails(service):
     """Fetch unread emails from Inbox"""
     try:
-        results = service.users().messages().list(userId="me", q="is:unread in:inbox").execute()
+        results = (
+            service.users()
+            .messages()
+            .list(userId="me", q="is:unread in:inbox")
+            .execute()
+        )
         messages = results.get("messages", [])
         return messages
     except Exception as error:
@@ -54,7 +59,12 @@ def get_message_headers(service, msg_id):
     msg = (
         service.users()
         .messages()
-        .get(userId="me", id=msg_id, format="metadata", metadataHeaders=["Subject", "From"])
+        .get(
+            userId="me",
+            id=msg_id,
+            format="metadata",
+            metadataHeaders=["Subject", "From"],
+        )
         .execute()
     )
     headers = msg["payload"]["headers"]
@@ -78,25 +88,33 @@ def apply_action_to_gmail(service, msg_id, action_label):
         if action_label == "archive":
             # Remove INBOX label to archive it
             body = {"removeLabelIds": ["INBOX"]}
-            service.users().messages().modify(userId="me", id=msg_id, body=body).execute()
+            service.users().messages().modify(
+                userId="me", id=msg_id, body=body
+            ).execute()
             print("  -> Action: Archived email.")
 
         elif action_label == "mark_important":
             # Add IMPORTANT label
             body = {"addLabelIds": ["IMPORTANT"]}
-            service.users().messages().modify(userId="me", id=msg_id, body=body).execute()
+            service.users().messages().modify(
+                userId="me", id=msg_id, body=body
+            ).execute()
             print("  -> Action: Marked as IMPORTANT.")
 
         elif action_label == "delay_reply":
             # Just add our own custom label or star it, or leave it in inbox
             body = {"addLabelIds": ["STARRED"]}
-            service.users().messages().modify(userId="me", id=msg_id, body=body).execute()
+            service.users().messages().modify(
+                userId="me", id=msg_id, body=body
+            ).execute()
             print("  -> Action: Starred/Delayed reply.")
 
         elif action_label == "reply_now":
             # Star it and mark important, or keep in inbox
             body = {"addLabelIds": ["STARRED", "IMPORTANT"]}
-            service.users().messages().modify(userId="me", id=msg_id, body=body).execute()
+            service.users().messages().modify(
+                userId="me", id=msg_id, body=body
+            ).execute()
             print("  -> Action: Flagged for IMMEDIATE REPLY.")
 
         # Finally, mark the email as read so we don't process it again next loop
@@ -138,7 +156,9 @@ def run_gmail_integration():
 
         # Decide action!
         action_idx = agent.select_action(state_vector)
-        action_label = ["reply_now", "delay_reply", "mark_important", "archive"][action_idx]
+        action_label = ["reply_now", "delay_reply", "mark_important", "archive"][
+            action_idx
+        ]
 
         print(f"  -> Agent Decision: {action_label}")
 

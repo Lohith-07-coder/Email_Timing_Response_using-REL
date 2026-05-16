@@ -6,7 +6,8 @@ writing action recommendations to a JSON Lines output file.
 Logs inference metrics and drift reports to MLflow.
 
 Usage:
-    python pipelines/inference_pipeline.py --input emails.jsonl --output predictions.jsonl
+    python pipelines/inference_pipeline.py \
+        --input emails.jsonl --output predictions.jsonl
     python pipelines/inference_pipeline.py --demo   # runs 20 synthetic emails
 """
 

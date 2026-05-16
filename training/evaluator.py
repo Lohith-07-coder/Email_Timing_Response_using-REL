@@ -14,13 +14,18 @@ class Evaluator:
     """
 
     OPTIMAL_ACTIONS = {3: 0, 2: 2, 1: 3}  # priority → best action
-    ACTION_LABELS = {0: "reply_now", 1: "delay_reply", 2: "mark_important", 3: "archive"}
+    ACTION_LABELS = {
+        0: "reply_now",
+        1: "delay_reply",
+        2: "mark_important",
+        3: "archive",
+    }
 
     def __init__(self, env: BaseEnvironment, agent: BaseAgent):
         self._env = env
         self._agent = agent
 
-    # ── 1. test run ───────────────────────────────────────────────
+    # 1. test run
 
     def evaluate(self, episodes: int = 100) -> dict:
         """
@@ -57,15 +62,21 @@ class Evaluator:
         }
 
     def print_results(self, results: dict) -> None:
-        print("\n── Evaluation Results ──────────────────────────────")
+        print("\n── Evaluation Results")
         print(f"  Mean reward   : {results['mean_reward']:+.2f}")
         print(f"  Decision acc  : {results['accuracy']}%")
-        print(f"  Reward range  : {results['min_reward']:+.2f}  →  {results['max_reward']:+.2f}")
+        print(
+            f"  Reward range  : {results['min_reward']:+.2f}  "
+            f"→  {results['max_reward']:+.2f}"
+        )
 
-    # ── 2. learning curve ─────────────────────────────────────────
+    # 2. learning curve
 
     def plot_rewards(
-        self, reward_history: list[float], window: int = 50, save_path: str = "reward_curve.png"
+        self,
+        reward_history: list[float],
+        window: int = 50,
+        save_path: str = "reward_curve.png",
     ) -> None:
         """
         Plot raw rewards + a rolling average (smoothed curve).
@@ -81,7 +92,12 @@ class Evaluator:
         fig, ax = plt.subplots(figsize=(10, 5))
 
         ax.plot(
-            episodes, reward_history, color="#94a3b8", alpha=0.4, linewidth=0.8, label="Raw reward"
+            episodes,
+            reward_history,
+            color="#94a3b8",
+            alpha=0.4,
+            linewidth=0.8,
+            label="Raw reward",
         )
         ax.plot(
             episodes[window - 1 :],
@@ -94,7 +110,11 @@ class Evaluator:
         ax.axhline(0, color="#475569", linewidth=0.8, linestyle="--")
         ax.set_xlabel("Episode", fontsize=12)
         ax.set_ylabel("Total Reward", fontsize=12)
-        ax.set_title("Q-Learning Agent — Reward vs Episodes", fontsize=14, pad=14)
+        ax.set_title(
+            "Q-Learning Agent — Reward vs Episodes",
+            fontsize=14,
+            pad=14,
+        )
         ax.legend(fontsize=11)
         ax.grid(True, alpha=0.2)
         fig.tight_layout()
@@ -102,7 +122,7 @@ class Evaluator:
         plt.close(fig)
         print(f"  Plot saved → {save_path}")
 
-    # ── helper ────────────────────────────────────────────────────
+    # helper
 
     @staticmethod
     def _rolling_mean(values: list[float], window: int) -> np.ndarray:

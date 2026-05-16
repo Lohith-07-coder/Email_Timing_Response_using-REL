@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 End-to-end training pipeline with MLflow experiment tracking.
 
@@ -37,17 +38,31 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
 logger = get_logger(__name__)
+=======
+import argparse
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from config import Config
+from monitoring.model_registry import (
+    DQN_MODEL_NAME,
+    QL_MODEL_NAME,
+    compare_runs,
+    promote_model,
+    register_dqn_model,
+    register_ql_model,
+)
+from training.trainer import train_dqn, train_q_learning
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 
 
-def parse_args():
-    p = argparse.ArgumentParser(description="Email Timing Response — Training Pipeline")
-    p.add_argument("--episodes", type=int, default=Config.EPISODES)
-    p.add_argument(
-        "--source",
-        default="synthetic",
-        choices=["synthetic", "enron"],
-        help="Email data source for the simulator",
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Email Timing Response training pipeline"
     )
+<<<<<<< HEAD
     p.add_argument("--output-dir", default=Config.MODEL_DIR)
     p.add_argument("--checkpoint-every", type=int, default=Config.CHECKPOINT_EVERY)
     p.add_argument("--log-every", type=int, default=Config.LOG_EVERY)
@@ -58,12 +73,23 @@ def parse_args():
         help="Disable MLflow tracking for this run",
     )
     return p.parse_args()
+=======
+    parser.add_argument("--agent", choices=["dqn", "q_learning"], default="dqn")
+    parser.add_argument("--episodes", type=int, default=Config.EPISODES)
+    parser.add_argument("--source", choices=["synthetic", "enron"], default="synthetic")
+    parser.add_argument("--run-name", default=None)
+    parser.add_argument("--register", action="store_true")
+    parser.add_argument("--promote", action="store_true")
+    return parser.parse_args()
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 
 
-def run(args=None):
-    if args is None:
-        args = parse_args()
+def _register_model(agent_type: str, run_id: str):
+    if agent_type == "dqn":
+        return register_dqn_model(run_id)
+    return register_ql_model(run_id)
 
+<<<<<<< HEAD
     use_mlflow = not getattr(args, "no_mlflow", False)
 
     logger.info("=== Training Pipeline Started ===")
@@ -78,33 +104,33 @@ def run(args=None):
         source = SyntheticEmailSource()
     elif args.source == "enron":
         source = EnronSource()
+=======
+
+def run(args: argparse.Namespace | None = None):
+    args = args or parse_args()
+    if args.agent == "dqn":
+        result = train_dqn(args.episodes, args.run_name, args.source)
+        model_name = DQN_MODEL_NAME
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
     else:
-        raise ValueError(f"Unknown source: {args.source}")
+        result = train_q_learning(args.episodes, args.run_name, args.source)
+        model_name = QL_MODEL_NAME
 
-    simulator = EmailSimulator(source)
-    env = EmailEnvironment(simulator, max_steps=Config.MAX_STEPS)
-    agent = DQNAgent(
-        state_size=Config.STATE_SIZE,
-        action_size=Config.ACTION_SIZE,
-        alpha=Config.DQN_ALPHA,
-        gamma=Config.DQN_GAMMA,
-        epsilon=Config.DQN_EPSILON,
-        epsilon_min=Config.DQN_EPSILON_MIN,
-        epsilon_decay=Config.DQN_EPSILON_DECAY,
-        batch_size=Config.DQN_BATCH_SIZE,
-        target_update=Config.DQN_TARGET_UPDATE,
-        buffer_capacity=Config.DQN_BUFFER_CAP,
-    )
+    registered_model = None
+    if args.register:
+        registered_model = _register_model(args.agent, result["run_id"])
+        print(
+            "Registered model "
+            f"{registered_model.name} version {registered_model.version}"
+        )
 
-    trainer = Trainer(
-        env=env,
-        agent=agent,
-        episodes=args.episodes,
-        log_every=args.log_every,
-        checkpoint_every=args.checkpoint_every,
-        checkpoint_dir=args.output_dir,
-    )
+    if args.promote:
+        if registered_model is None:
+            registered_model = _register_model(args.agent, result["run_id"])
+        promote_model(model_name, registered_model.version)
+        print(f"Promoted {model_name} version {registered_model.version} to Production")
 
+<<<<<<< HEAD
     # ── MLflow run context ────────────────────────────────────────────────────
     version_tag = args.tag or time.strftime("%Y%m%d_%H%M%S")
 
@@ -207,6 +233,10 @@ class _noop_ctx:
 
     def __exit__(self, *args):
         pass
+=======
+    print(compare_runs(top_n=5))
+    return result
+>>>>>>> 729dc55db9c02ec9a9c0305798c8c49c755f0b64
 
 
 if __name__ == "__main__":

@@ -84,13 +84,18 @@ class TestDQNAgent:
         for i in range(dqn_agent.batch_size + 5):
             dqn_agent.learn(dummy_state, i % 4, float(i % 3), next_state, i % 10 == 0)
         params_after = list(dqn_agent._policy_net.parameters())
-        changed = any(not torch.equal(b, a) for b, a in zip(params_before, params_after))
+        changed = any(
+            not torch.equal(b, a) for b, a in zip(params_before, params_after)
+        )
         assert changed, "Parameters should update after a full batch"
 
     def test_epsilon_decay(self, dqn_agent):
         initial_eps = dqn_agent.epsilon
         dqn_agent.decay_epsilon()
-        assert dqn_agent.epsilon < initial_eps or dqn_agent.epsilon == dqn_agent.epsilon_min
+        assert (
+            dqn_agent.epsilon < initial_eps
+            or dqn_agent.epsilon == dqn_agent.epsilon_min
+        )
 
     def test_epsilon_never_below_min(self, dqn_agent):
         for _ in range(10_000):

@@ -17,6 +17,8 @@ import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+load_dotenv()
 
 from app.api.response_routes import router as response_router
 from app.schemas import (

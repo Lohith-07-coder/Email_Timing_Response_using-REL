@@ -346,7 +346,18 @@
 </style>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════════
 // AI Response Panel Functions
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Configuration - FastAPI Backend
+const API_CONFIG = {
+    BASE_URL: 'http://localhost:8000',
+    ENDPOINTS: {
+        GENERATE: '/api/v1/responses/generate',
+        FEEDBACK: '/api/v1/responses/feedback',
+    }
+};
 
 let currentResponseId = null;
 let currentEmailData = null;
@@ -372,47 +383,70 @@ async function generateResponse(tone) {
     textarea.value = 'Generating response...';
     
     try {
-        const response = await fetch('/api/responses/generate', {
+        const fastApiUrl = API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.GENERATE;
+        
+        const response = await fetch(fastApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message_id: currentEmailData.id,
-                thread_id: currentEmailData.thread_id,
-                sender: currentEmailData.sender,
-                subject: currentEmailData.subject,
-                body: currentEmailData.body,
+                message_id: currentEmailData.id || 'msg_' + Date.now(),
+                thread_id: currentEmailData.thread_id || 'thread_' + Date.now(),
+                sender: currentEmailData.sender || 'unknown@example.com',
+                subject: currentEmailData.subject || '(No subject)',
+                body: currentEmailData.body || '',
                 tone: tone,
+                max_length: 500,
+                require_approval: true,
             }),
         });
         
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                `API Error ${response.status}: ` +
+                (errorData.detail || response.statusText)
+            );
+        }
+        
         const result = await response.json();
         
-        if (result.success) {
-            currentResponseId = result.response_id;
-            textarea.value = result.generated_text;
-            
-            // Update confidence
-            const confidence = Math.round(result.confidence * 100);
-            document.getElementById('confidence-badge').textContent = `Confidence: ${confidence}%`;
-            
-            // Update character count
-            document.getElementById('length-counter').textContent = `${result.generated_text.length} chars`;
-            
-            // Show warnings if any
-            if (result.warnings && result.warnings.length > 0) {
-                document.getElementById('safety-warnings').style.display = 'block';
-                const warningList = document.getElementById('warning-list');
-                warningList.innerHTML = result.warnings
-                    .map(w => `<li>${w}</li>`)
-                    .join('');
-            } else {
-                document.getElementById('safety-warnings').style.display = 'none';
-            }
-        } else {
-            textarea.value = `Error: ${result.error}`;
+        // Validate response structure from FastAPI
+        if (!result.response_id || !result.generated_text) {
+            throw new Error('Invalid response from API: missing required fields');
         }
+        
+        currentResponseId = result.response_id;
+        textarea.value = result.generated_text;
+        
+        // Update confidence
+        const confidence = Math.round((result.confidence || 0) * 100);
+        document.getElementById('confidence-badge').textContent =
+            `Confidence: ${confidence}%`;
+        
+        // Update character count
+        document.getElementById('length-counter').textContent =
+            `${result.generated_text.length} chars`;
+        
+        // Show warnings if any
+        if (result.warnings && result.warnings.length > 0) {
+            document.getElementById('safety-warnings').style.display = 'block';
+            const warningList = document.getElementById('warning-list');
+            warningList.innerHTML = result.warnings
+                .map(w => `<li>${w}</li>`)
+                .join('');
+        } else {
+            document.getElementById('safety-warnings').style.display = 'none';
+        }
+        
+        // Log successful generation
+        console.log('Response generated successfully:', result.response_id);
     } catch (error) {
-        textarea.value = `Error: ${error.message}`;
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        textarea.value = `❌ Error: ${errorMsg}`;
+        console.error('Failed to generate response:', error);
+        document.getElementById('safety-warnings').style.display = 'block';
+        const warningList = document.getElementById('warning-list');
+        warningList.innerHTML = `<li>Failed to generate response. Check browser console.</li>`;
     }
 }
 
@@ -443,20 +477,32 @@ async function recordFeedback(feedbackType, responseText) {
     if (!currentResponseId) return;
     
     try {
-        await fetch('/api/responses/feedback', {
+        const fastApiUrl = API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.FEEDBACK;
+        
+        const response = await fetch(fastApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 response_id: currentResponseId,
-                sender: currentEmailData?.sender,
                 feedback_type: feedbackType,
                 edited_text: responseText,
                 approval_time_seconds: 5.0,
                 feedback_notes: '',
             }),
         });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                `Feedback API Error ${response.status}: ` +
+                (errorData.detail || response.statusText)
+            );
+        }
+        
+        console.log('Feedback recorded successfully:', feedbackType);
     } catch (error) {
         console.error('Error recording feedback:', error);
+        // Don't block user interaction, just log the error
     }
 }
 

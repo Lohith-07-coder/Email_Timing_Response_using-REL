@@ -79,7 +79,7 @@ from app.api.response_routes import (
     response_generator,
     safety_filter,
 )
-from app.workflow.actions import apply_approved_action
+from app.workflow.gmail_actions import apply_approved_action
 from app.workflow.analytics import build_dashboard_metrics
 from app.workflow.feedback import FeedbackStore
 from app.workflow.gemini_engine import GeminiContextEngine
@@ -88,7 +88,7 @@ from app.workflow.gemini_engine import GeminiContextEngine
 from app.workflow.preprocessing import parse_gmail_message
 from app.workflow.priority_engine import score_email, should_ignore_sender
 from app.workflow.recommender import build_recommendation
-from app.workflow.reply_service import create_reply_draft
+# from app.workflow.reply_service import create_reply_draft
 from app.workflow.thread_context import fetch_thread_context
 from config import Config
 from data.email_data import Email
